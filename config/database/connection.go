@@ -28,15 +28,19 @@ func New() *Data {
 }
 
 func initDB() {
-	db, err := GetConnection()
+	db, err := getConnection()
 	if err != nil {
-		fmt.Println("Cannot connect to database")
+		log.Println("Cannot connect to database")
 		log.Fatal("This is the error:", err)
 	} else {
-		fmt.Println("We are connected to the database")
+		log.Println("We are connected to the database")
 	}
 
-	err = MakeMigration(db)
+	if err := db.Ping(); err != nil {
+		log.Fatal(err)
+	}
+
+	err = makeMigration(db)
 	if err != nil {
 		log.Fatal("This is the error:", err)
 	}
@@ -46,7 +50,7 @@ func initDB() {
 	}
 }
 
-func GetConnection() (*sql.DB, error) {
+func getConnection() (*sql.DB, error) {
 
 	DbHost := os.Getenv("DB_HOST")
 	DbDriver := os.Getenv("DB_DRIVER")
@@ -60,7 +64,7 @@ func GetConnection() (*sql.DB, error) {
 	return sql.Open(DbDriver, uri)
 }
 
-func MakeMigration(db *sql.DB) error {
+func makeMigration(db *sql.DB) error {
 	file, err := ioutil.ReadFile("./config/database/models.sql")
 	if err != nil {
 		return err
@@ -72,13 +76,4 @@ func MakeMigration(db *sql.DB) error {
 	}
 
 	return rows.Close()
-}
-
-// Close closes the resources used by data.
-func Close() error {
-	if data == nil {
-		return nil
-	}
-
-	return data.DB.Close()
 }

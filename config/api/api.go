@@ -2,18 +2,16 @@ package api
 
 import (
 	"dojo_go_study/config/database"
-	"dojo_go_study/handler"
-	"net/http"
-
-	"github.com/go-chi/chi"
 )
 
-// New returns the API V1 Handler with configuration.
-func New(conn *database.Data) http.Handler {
-	router := chi.NewRouter()
+func Start(port string)  {
 
-	ur := handler.NewUserHandler(conn)
-	router.Mount("/users", RoutesUser(ur))
+	// connection to the database.
+	db := database.New()
+	defer db.DB.Close()
 
-	return router
+	server := newServer(port, db)
+
+	// start the server.
+	server.Start()
 }

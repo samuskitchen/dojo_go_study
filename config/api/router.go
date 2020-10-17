@@ -7,8 +7,8 @@ import (
 )
 
 
-// Routes returns user router with each endpoint.
-func RoutesUser(handler *handler.UserRouter) http.Handler {
+// routesUser returns user router with each endpoint.
+func routesUser(handler *handler.UserRouter) http.Handler {
 	router := chi.NewRouter()
 
 	router.Get("/", handler.GetAllUsersHandler)

@@ -8,15 +8,15 @@ import (
 	"time"
 )
 
+type sqlUserRepo struct {
+	Conn *database.Data
+}
+
 // NewSQLPostRepo returns implement of user repository interface
 func NewPostgresUserRepo(Conn *database.Data) repository.UserRepository {
 	return &sqlUserRepo{
 		Conn: Conn,
 	}
-}
-
-type sqlUserRepo struct {
-	Conn *database.Data
 }
 
 // GetAll returns all users.
