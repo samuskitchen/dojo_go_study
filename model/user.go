@@ -13,7 +13,7 @@ type User struct {
 	Password     string    `json:"password,omitempty"`
 	PasswordHash string    `json:"-"`
 	CreatedAt    time.Time `json:"-"`
-	CreatedAtInt  uint64    `json:"created_at,omitempty"`
+	CreatedAtInt uint64    `json:"created_at,omitempty"`
 	UpdatedAt    time.Time `json:"-"`
 	UpdatedAtInt uint64    `json:"updated_at,omitempty"`
 }

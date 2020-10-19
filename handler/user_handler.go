@@ -13,16 +13,16 @@ import (
 	"strconv"
 )
 
+// UserRouter ...
+type UserRouter struct {
+	Repo repository.UserRepository
+}
+
 // NewUserHandler ...
 func NewUserHandler(db *database.Data) *UserRouter {
 	return &UserRouter{
 		Repo: userRepo.NewPostgresUserRepo(db),
 	}
-}
-
-// UserRouter ...
-type UserRouter struct {
-	Repo repository.UserRepository
 }
 
 // GetAllUser response all the users.
@@ -31,11 +31,17 @@ func (ur *UserRouter) GetAllUsersHandler(w http.ResponseWriter, r *http.Request)
 
 	users, err := ur.Repo.GetAllUser(ctx)
 	if err != nil {
-		middleware.HTTPError(w, r, http.StatusNotFound, err.Error())
+		middleware.HTTPError(w, r, http.StatusNotFound,"0004", err.Error())
 		return
 	}
 
-	middleware.JSON(w, r, http.StatusOK, users)
+	result := middleware.Response{
+		Status:  true,
+		Data:    middleware.Map{"users": users} ,
+		Message: "Ok",
+	}
+
+	middleware.JSON(w, r, http.StatusOK, result)
 }
 
 // GetOneHandler response one user by id.
@@ -44,14 +50,14 @@ func (ur *UserRouter) GetOneHandler(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		middleware.HTTPError(w, r, http.StatusBadRequest, err.Error())
+		middleware.HTTPError(w, r, http.StatusBadRequest, "0004", err.Error())
 		return
 	}
 
 	ctx := r.Context()
 	userResult, err := ur.Repo.GetOne(ctx, uint(id))
 	if err != nil {
-		middleware.HTTPError(w, r, http.StatusNotFound, err.Error())
+		middleware.HTTPError(w, r, http.StatusNotFound, "0004", err.Error())
 		return
 	}
 
@@ -63,20 +69,20 @@ func (ur *UserRouter) CreateHandler(w http.ResponseWriter, r *http.Request) {
 	var user model.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		middleware.HTTPError(w, r, http.StatusBadRequest, err.Error())
+		middleware.HTTPError(w, r, http.StatusBadRequest, "0004", err.Error())
 		return
 	}
 
 	defer r.Body.Close()
 	if err := user.HashPassword(); err != nil {
-		middleware.HTTPError(w, r, http.StatusBadRequest, err.Error())
+		middleware.HTTPError(w, r, http.StatusBadRequest, "0004", err.Error())
 		return
 	}
 
 	ctx := r.Context()
 	err = ur.Repo.Create(ctx, &user)
 	if err != nil {
-		middleware.HTTPError(w, r, http.StatusConflict, err.Error())
+		middleware.HTTPError(w, r, http.StatusConflict, "0004", err.Error())
 		return
 	}
 
@@ -92,14 +98,14 @@ func (ur *UserRouter) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		middleware.HTTPError(w, r, http.StatusBadRequest, err.Error())
+		middleware.HTTPError(w, r, http.StatusBadRequest, "0004", err.Error())
 		return
 	}
 
 	var userUpdate model.User
 	err = json.NewDecoder(r.Body).Decode(&userUpdate)
 	if err != nil {
-		middleware.HTTPError(w, r, http.StatusBadRequest, err.Error())
+		middleware.HTTPError(w, r, http.StatusBadRequest, "0004", err.Error())
 		return
 	}
 
@@ -108,7 +114,7 @@ func (ur *UserRouter) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = ur.Repo.Update(ctx, uint(id), userUpdate)
 	if err != nil {
-		middleware.HTTPError(w, r, http.StatusConflict, err.Error())
+		middleware.HTTPError(w, r, http.StatusConflict, "0004", err.Error())
 		return
 	}
 
@@ -121,17 +127,16 @@ func (ur *UserRouter) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		middleware.HTTPError(w, r, http.StatusBadRequest, err.Error())
+		middleware.HTTPError(w, r, http.StatusBadRequest, "0004", err.Error())
 		return
 	}
 
 	ctx := r.Context()
 	err = ur.Repo.Delete(ctx, uint(id))
 	if err != nil {
-		middleware.HTTPError(w, r, http.StatusNotFound, err.Error())
+		middleware.HTTPError(w, r, http.StatusNotFound, "0004", err.Error())
 		return
 	}
 
 	middleware.JSON(w, r, http.StatusNoContent, middleware.Map{})
 }
-
