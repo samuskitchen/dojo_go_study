@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"dojo_go_study/config/database"
-	"dojo_go_study/handler"
 	"github.com/go-chi/chi/middleware"
 	"log"
 	"os"
@@ -15,18 +14,18 @@ import (
 	"github.com/go-chi/chi"
 )
 
-// server is a base server configuration.
-type server struct {
+// Server is a base Server configuration.
+type Server struct {
 	*http.Server
 }
 
 // ServeHTTP implements the http.Handler interface for the server type.
-func (srv *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	srv.Handler.ServeHTTP(w, r)
 }
 
-// newServer initialized a newRoutes server with configuration.
-func newServer(port string, conn *database.Data) *server {
+// newServer initialized a Routes Server with configuration.
+func newServer(port string, conn *database.Data) *Server {
 
 	router := chi.NewRouter()
 
@@ -35,7 +34,7 @@ func newServer(port string, conn *database.Data) *server {
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 
-	router.Mount("/api/v1", newRoutes(conn))
+	router.Mount("/api/v1", Routes(conn))
 
 	s := &http.Server{
 		Addr:         ":" + port,
@@ -45,21 +44,11 @@ func newServer(port string, conn *database.Data) *server {
 		IdleTimeout:  15 * time.Second,
 	}
 
-	return &server{s}
-}
-
-// newRoutes returns the API V1 Handler with configuration.
-func newRoutes(conn *database.Data) http.Handler {
-	router := chi.NewRouter()
-
-	ur := handler.NewUserHandler(conn)
-	router.Mount("/users", routesUser(ur))
-
-	return router
+	return &Server{s}
 }
 
 // Start the server.
-func (srv *server) Start() {
+func (srv *Server) Start() {
 	log.Println("starting API cmd")
 
 	go func() {
@@ -71,7 +60,7 @@ func (srv *server) Start() {
 	srv.gracefulShutdown()
 }
 
-func (srv *server) gracefulShutdown() {
+func (srv *Server) gracefulShutdown() {
 	quit := make(chan os.Signal, 1)
 
 	signal.Notify(quit, os.Interrupt)

@@ -31,7 +31,7 @@ func (ur *sqlUserRepo) GetAllUser(ctx context.Context) ([]model.User, error) {
 	var users []model.User
 	for rows.Next() {
 		var userRow model.User
-		_ = rows.Scan(&userRow.ID, &userRow.Name, &userRow.Surname, &userRow.Username, &userRow.CreatedAt, &userRow.UpdatedAt)
+		_ = rows.Scan(&userRow.ID, &userRow.Name, &userRow.Surname, &userRow.Username,  &userRow.Email, &userRow.CreatedAt, &userRow.UpdatedAt)
 
 		createdAtUnix := userRow.CreatedAt.Unix()
 		userRow.CreatedAtInt = uint64(createdAtUnix)
@@ -51,7 +51,7 @@ func (ur *sqlUserRepo) GetOne(ctx context.Context, id uint) (model.User, error) 
 	row := ur.Conn.DB.QueryRowContext(ctx, selectUserById, id)
 
 	var userScan model.User
-	err := row.Scan(&userScan.ID, &userScan.Name, &userScan.Username, &userScan.Username, &userScan.CreatedAt, &userScan.UpdatedAt)
+	err := row.Scan(&userScan.ID, &userScan.Name, &userScan.Username, &userScan.Username, &userScan.Email, &userScan.CreatedAt, &userScan.UpdatedAt)
 	if err != nil {
 		return model.User{}, err
 	}
@@ -70,7 +70,7 @@ func (ur *sqlUserRepo) GetByUsername(ctx context.Context, username string) (mode
 	row := ur.Conn.DB.QueryRowContext(ctx, selectUSerByUsername, username)
 
 	var userScan model.User
-	err := row.Scan(&userScan.ID, &userScan.Name, &userScan.Surname, &userScan.Username, &userScan.PasswordHash, &userScan.CreatedAt, &userScan.UpdatedAt)
+	err := row.Scan(&userScan.ID, &userScan.Name, &userScan.Surname, &userScan.Username, &userScan.Email, &userScan.PasswordHash, &userScan.CreatedAt, &userScan.UpdatedAt)
 	if err != nil {
 		return model.User{}, err
 	}
@@ -95,7 +95,7 @@ func (ur *sqlUserRepo) Create(ctx context.Context, user *model.User) error {
 
 	defer stmt.Close()
 
-	row := stmt.QueryRowContext(ctx, user.Name, user.Username, user.Username, user.PasswordHash, now, now)
+	row := stmt.QueryRowContext(ctx, user.Name, user.Surname, user.Username, user.Email, user.PasswordHash, now, now)
 
 	err = row.Scan(&user.ID)
 	if err != nil {

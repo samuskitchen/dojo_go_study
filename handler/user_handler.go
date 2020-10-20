@@ -61,7 +61,13 @@ func (ur *UserRouter) GetOneHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	middleware.JSON(w, r, http.StatusOK, userResult)
+	result := middleware.Response{
+		Status:  true,
+		Data:    middleware.Map{"user": userResult} ,
+		Message: "Ok",
+	}
+
+	middleware.JSON(w, r, http.StatusOK, result)
 }
 
 // CreateHandler Create a new user.
@@ -79,6 +85,12 @@ func (ur *UserRouter) CreateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = user.Validate("")
+	if err != nil {
+		middleware.HTTPError(w, r, http.StatusUnprocessableEntity, "0004", err.Error())
+		return
+	}
+
 	ctx := r.Context()
 	err = ur.Repo.Create(ctx, &user)
 	if err != nil {
@@ -88,12 +100,20 @@ func (ur *UserRouter) CreateHandler(w http.ResponseWriter, r *http.Request) {
 
 	user.Password = ""
 	w.Header().Add("Location", fmt.Sprintf("%s%d", r.URL.String(), user.ID))
-	middleware.JSON(w, r, http.StatusCreated, user)
+
+	result := middleware.Response{
+		Status:  true,
+		Data:    middleware.Map{"user": user} ,
+		Message: "Ok",
+	}
+
+	middleware.JSON(w, r, http.StatusCreated, result)
 
 }
 
 // UpdateHandler update a stored user by id.
 func (ur *UserRouter) UpdateHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	idStr := chi.URLParam(r, "id")
 
 	id, err := strconv.Atoi(idStr)
@@ -109,16 +129,26 @@ func (ur *UserRouter) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defer r.Body.Close()
-	ctx := r.Context()
+	err = userUpdate.Validate("")
+	if err != nil {
+		middleware.HTTPError(w, r, http.StatusUnprocessableEntity, "0004", err.Error())
+		return
+	}
 
+	defer r.Body.Close()
 	err = ur.Repo.Update(ctx, uint(id), userUpdate)
 	if err != nil {
 		middleware.HTTPError(w, r, http.StatusConflict, "0004", err.Error())
 		return
 	}
 
-	middleware.JSON(w, r, http.StatusOK, nil)
+	result := middleware.Response{
+		Status:  true,
+		Data:    middleware.Map{"user": userUpdate} ,
+		Message: "Ok",
+	}
+
+	middleware.JSON(w, r, http.StatusOK, result)
 }
 
 // DeleteHandler Remove a user by ID.
@@ -138,5 +168,11 @@ func (ur *UserRouter) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	middleware.JSON(w, r, http.StatusNoContent, middleware.Map{})
+	result := middleware.Response{
+		Status:  true,
+		Data:    middleware.Map{"id": id} ,
+		Message: "Ok",
+	}
+
+	middleware.JSON(w, r, http.StatusNoContent, result)
 }

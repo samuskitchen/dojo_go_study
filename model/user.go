@@ -1,7 +1,10 @@
 package model
 
 import (
+	"errors"
+	"github.com/badoux/checkmail"
 	"golang.org/x/crypto/bcrypt"
+	"strings"
 	"time"
 )
 
@@ -10,6 +13,7 @@ type User struct {
 	Name         string    `json:"name,omitempty"`
 	Surname      string    `json:"surname,omitempty"`
 	Username     string    `json:"username,omitempty"`
+	Email        string    `json:"email,omitempty"`
 	Password     string    `json:"password,omitempty"`
 	PasswordHash string    `json:"-"`
 	CreatedAt    time.Time `json:"-"`
@@ -35,4 +39,49 @@ func (u *User) PasswordMatch(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password))
 
 	return err == nil
+}
+
+// Validate is the validation method for mandatory fields
+func (u *User) Validate(action string) error {
+
+	const msgErrorPass = "required password"
+	const msgErrorEmail = "required Email"
+	const msgErrorEmailRequired = "invalid email"
+
+	switch strings.ToLower(action) {
+
+	case "login":
+		if u.Password == "" {
+			return errors.New(msgErrorPass)
+		}
+
+		if u.Email == "" {
+			return errors.New(msgErrorEmail)
+		}
+
+		if err := checkmail.ValidateFormat(u.Username); err != nil {
+			return errors.New(msgErrorEmailRequired)
+		}
+
+		return nil
+
+	default:
+		if u.Username == "" {
+			return errors.New("required nickname")
+		}
+
+		if u.Password == "" {
+			return errors.New(msgErrorPass)
+		}
+
+		if u.Email == "" {
+			return errors.New(msgErrorEmail)
+		}
+
+		if err := checkmail.ValidateFormat(u.Email); err != nil {
+			return errors.New(msgErrorEmailRequired)
+		}
+
+		return nil
+	}
 }
