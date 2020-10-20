@@ -43,9 +43,17 @@
      
 ### Generate Mock Interface
 This is an automatic mock generator using mockery, the first thing we must do is go to the path of the file that we want to autogenerate:
+
+Download the library
+```
+go get -u github.com/vektra/mockery
+```
+
+We enter the route where you are
 ```
 cd path
 ```
+
 After entering the route we must execute the following command, Repository this is name the interface
 ```
 mockery -name Repository
