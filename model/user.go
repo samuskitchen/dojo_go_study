@@ -8,6 +8,12 @@ import (
 	"time"
 )
 
+const (
+	msgErrorPass          = "required password"
+	msgErrorEmail         = "required Email"
+	msgErrorEmailRequired = "invalid email"
+)
+
 type User struct {
 	ID           uint      `json:"id,omitempty"`
 	Name         string    `json:"name,omitempty"`
@@ -43,10 +49,6 @@ func (u *User) PasswordMatch(password string) bool {
 
 // Validate is the validation method for mandatory fields
 func (u *User) Validate(action string) error {
-
-	const msgErrorPass = "required password"
-	const msgErrorEmail = "required Email"
-	const msgErrorEmailRequired = "invalid email"
 
 	switch strings.ToLower(action) {
 
