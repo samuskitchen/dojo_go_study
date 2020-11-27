@@ -112,4 +112,14 @@ go tool cover -html=coverage_integration.out
 go tool cover -func=coverage_integration.out
 ```
 
+### Test Coverage
+
+commands for the project
+```
+go test -covermode=count -coverprofile=coverage.out ./...
+
+go tool cover -html=coverage.out
+
+go tool cover -func=coverage.out
+```
 
